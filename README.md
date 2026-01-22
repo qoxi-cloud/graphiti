@@ -33,6 +33,8 @@ Graphiti
 > [!TIP]
 > Check out the new [MCP server for Graphiti](mcp_server/README.md)! Give Claude, Cursor, and other MCP clients powerful
 > Knowledge Graph-based memory.
+>
+> Also available: [gRPC server](grpc_server/README.md) for high-performance, low-latency integration with streaming support.
 
 Graphiti is a framework for building and querying temporally-aware knowledge graphs, specifically tailored for AI agents
 operating in dynamic environments. Unlike traditional retrieval-augmented generation (RAG) methods, Graphiti
@@ -295,6 +297,39 @@ For detailed setup instructions and usage examples, see the [MCP server README](
 The `server` directory contains an API service for interacting with the Graphiti API. It is built using FastAPI.
 
 Please see the [server README](./server/README.md) for more information.
+
+## gRPC Server
+
+The `grpc_server` directory contains a high-performance gRPC server implementation for Graphiti. The gRPC server
+exposes Graphiti's functionality through the gRPC protocol, enabling efficient communication with low latency
+and support for streaming operations.
+
+Key features of the gRPC server include:
+
+- **Full API Coverage**: Episode, entity, and edge management with search capabilities
+- **Streaming Support**: Server streaming for bulk operations and bidirectional streaming for continuous ingestion
+- **Multiple Backends**: Support for FalkorDB (default) and Neo4j databases
+- **Multiple LLM Providers**: OpenAI, Anthropic, Gemini, Groq, and Azure OpenAI
+- **Security**: TLS/SSL encryption, API key and JWT authentication
+- **Production Ready**: Health checking, gRPC reflection, rate limiting, configurable timeouts
+- **Compression**: gzip/deflate compression for large payloads
+- **Observability**: OpenTelemetry distributed tracing integration
+
+Quick start with Docker:
+
+```bash
+cd grpc_server
+docker compose -f docker/docker-compose.yml up
+```
+
+Verify with grpcurl:
+
+```bash
+grpcurl -plaintext localhost:50051 list
+grpcurl -plaintext localhost:50051 graphiti.v1.AdminService/HealthCheck
+```
+
+For detailed setup instructions and API documentation, see the [gRPC server README](./grpc_server/README.md).
 
 ## Optional Environment Variables
 
@@ -644,6 +679,7 @@ Graphiti is under active development. We aim to maintain API stability while wor
     - Enable more flexible knowledge representation tailored to specific use cases
 - [x] Enhancing retrieval capabilities with more robust and configurable options
 - [x] Graphiti MCP Server
+- [x] Graphiti gRPC Server
 - [ ] Expanding test coverage to ensure reliability and catch edge cases
 
 ## Contributing

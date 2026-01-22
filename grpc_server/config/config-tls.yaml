@@ -1,0 +1,108 @@
+# Graphiti gRPC Server Configuration with TLS Enabled
+#
+# This configuration enables TLS encryption for the gRPC server.
+# Use this with docker-compose.tls.yml for secure communications.
+#
+# Prerequisites:
+#   1. Generate certificates: cd docker/certs && ./generate-certs.sh
+#   2. Start with TLS: cd docker && docker-compose -f docker-compose-falkordb.yml -f docker-compose.tls.yml up
+#
+# Environment variables can be used with ${VAR_NAME} or ${VAR_NAME:default_value} syntax
+
+# gRPC Server Configuration
+grpc:
+  host: "0.0.0.0"
+  port: 50051
+  max_workers: 10
+
+  # TLS Configuration
+  enable_tls: true
+  cert_path: "/app/certs/server.crt"
+  key_path: "/app/certs/server.key"
+  enable_reflection: true
+
+  # Compression
+  compression:
+    enabled: true
+    algorithm: "gzip"
+    level: 2
+
+  # Timeouts (seconds, 0 = no timeout)
+  timeouts:
+    enabled: true
+    default: 30
+    services:
+      IngestService:
+        default: 120
+        methods:
+          AddEpisodeBulk: 600
+          StreamEpisodes: 0
+      RetrieveService:
+        default: 30
+      AdminService:
+        default: 60
+
+  # Authentication (uncomment to enable)
+  # auth:
+  #   enabled: true
+  #   api_keys:
+  #     - "${GRAPHITI_API_KEY:}"
+  #   jwt_secret: "${GRAPHITI_JWT_SECRET:}"
+
+  # Rate limiting (uncomment to enable)
+  # rate_limit:
+  #   enabled: true
+  #   max_requests: 100
+
+# LLM Configuration
+llm:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  temperature: null
+  max_tokens: 4096
+  providers:
+    openai:
+      api_key: ${OPENAI_API_KEY:}
+      api_url: "https://api.openai.com/v1"
+    anthropic:
+      api_key: ${ANTHROPIC_API_KEY:}
+    gemini:
+      api_key: ${GOOGLE_API_KEY:}
+    groq:
+      api_key: ${GROQ_API_KEY:}
+
+# Embedder Configuration
+embedder:
+  provider: "openai"
+  model: "text-embedding-3-small"
+  dimensions: 1536
+  providers:
+    openai:
+      api_key: ${OPENAI_API_KEY:}
+    voyage:
+      api_key: ${VOYAGE_API_KEY:}
+
+# Database Configuration
+database:
+  provider: "falkordb"
+  providers:
+    neo4j:
+      uri: ${NEO4J_URI:bolt://localhost:7687}
+      username: ${NEO4J_USER:neo4j}
+      password: ${NEO4J_PASSWORD:}
+      database: "neo4j"
+      use_parallel_runtime: false
+    falkordb:
+      uri: ${FALKORDB_URI:redis://falkordb:6379}
+      password: ${FALKORDB_PASSWORD:}
+      database: "default_db"
+
+# Graphiti Application Configuration
+graphiti:
+  group_id: "main"
+  episode_id_prefix: ""
+  user_id: "grpc_user"
+  entity_types: []
+
+# Server Options
+destroy_graph: false

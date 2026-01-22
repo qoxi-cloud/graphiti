@@ -1,0 +1,56 @@
+# gRPC Server Configuration for Neo4j Docker setup
+grpc:
+  host: "0.0.0.0"
+  port: 50051
+  max_workers: 10
+  enable_tls: false
+  enable_reflection: true
+
+  # Compression
+  compression:
+    enabled: true
+    algorithm: "gzip"
+    level: 2
+
+  # Timeouts (seconds, 0 = no timeout)
+  timeouts:
+    enabled: true
+    default: 30
+    services:
+      IngestService:
+        default: 120
+        methods:
+          AddEpisodeBulk: 600
+          StreamEpisodes: 0
+      RetrieveService:
+        default: 30
+      AdminService:
+        default: 60
+        methods:
+          BuildCommunities: 300
+
+llm:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  providers:
+    openai:
+      api_key: ${OPENAI_API_KEY}
+
+embedder:
+  provider: "openai"
+  model: "text-embedding-3-small"
+  providers:
+    openai:
+      api_key: ${OPENAI_API_KEY}
+
+database:
+  provider: "neo4j"
+  providers:
+    neo4j:
+      uri: ${NEO4J_URI:bolt://localhost:7687}
+      username: ${NEO4J_USER:neo4j}
+      password: ${NEO4J_PASSWORD:password}
+      database: "neo4j"
+
+graphiti:
+  group_id: "main"

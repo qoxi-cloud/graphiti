@@ -72,7 +72,7 @@ def test_llm_factory(config: GraphitiConfig):
     test_config = config.llm.model_copy()
     test_config.provider = 'gemini'
     if not test_config.providers.gemini:
-        from config.schema import GeminiProviderConfig
+        from server_common.config import GeminiProviderConfig
 
         test_config.providers.gemini = GeminiProviderConfig(api_key='dummy_value_for_testing')
     else:

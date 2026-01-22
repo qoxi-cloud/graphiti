@@ -1,0 +1,64 @@
+# Graphiti gRPC Server with FalkorDB (Separate Services)
+#
+# Runs FalkorDB as a separate service from the gRPC server.
+# For all-in-one deployment, use docker-compose.yml instead.
+#
+# To enable TLS:
+#   1. Generate certificates: cd certs && ./generate-certs.sh
+#   2. Start with TLS overlay: docker-compose -f docker-compose-falkordb.yml -f docker-compose.tls.yml up
+
+services:
+  graphiti-grpc:
+    image: zepai/graphiti-grpc:standalone
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.standalone
+    env_file:
+      - path: ../.env
+        required: false
+    depends_on:
+      falkordb:
+        condition: service_healthy
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - FALKORDB_URI=${FALKORDB_URI:-redis://falkordb:6379}
+      - FALKORDB_PASSWORD=${FALKORDB_PASSWORD:-}
+      - FALKORDB_DATABASE=${FALKORDB_DATABASE:-default_db}
+      - GRAPHITI_GROUP_ID=${GRAPHITI_GROUP_ID:-main}
+      - SEMAPHORE_LIMIT=${SEMAPHORE_LIMIT:-10}
+      - CONFIG_PATH=/app/config/config.yaml
+    volumes:
+      - ../config/config-docker-falkordb.yaml:/app/config/config.yaml:ro
+    ports:
+      - "50051:50051"
+    restart: unless-stopped
+    networks:
+      - graphiti-network
+
+  falkordb:
+    image: falkordb/falkordb:latest
+    ports:
+      - "6379:6379"
+      - "3000:3000"
+    environment:
+      - FALKORDB_PASSWORD=${FALKORDB_PASSWORD:-}
+      - BROWSER=${BROWSER:-1}
+    volumes:
+      - falkordb-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - graphiti-network
+
+networks:
+  graphiti-network:
+    driver: bridge
+
+volumes:
+  falkordb-data:
+    driver: local

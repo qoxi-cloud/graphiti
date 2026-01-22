@@ -1,0 +1,151 @@
+// Copyright 2024, Zep Software, Inc.
+// Licensed under the Apache License, Version 2.0
+
+syntax = "proto3";
+
+package graphiti.v1;
+
+import "graphiti/v1/common.proto";
+import "graphiti/v1/nodes.proto";
+import "graphiti/v1/edges.proto";
+
+option go_package = "github.com/getzep/graphiti/grpc/v1;graphitiv1";
+
+// Edge search methods
+enum EdgeSearchMethod {
+  EDGE_SEARCH_METHOD_UNSPECIFIED = 0;
+  EDGE_SEARCH_METHOD_COSINE_SIMILARITY = 1;
+  EDGE_SEARCH_METHOD_BM25 = 2;
+  EDGE_SEARCH_METHOD_BFS = 3;
+}
+
+// Node search methods
+enum NodeSearchMethod {
+  NODE_SEARCH_METHOD_UNSPECIFIED = 0;
+  NODE_SEARCH_METHOD_COSINE_SIMILARITY = 1;
+  NODE_SEARCH_METHOD_BM25 = 2;
+  NODE_SEARCH_METHOD_BFS = 3;
+}
+
+// Episode search methods
+enum EpisodeSearchMethod {
+  EPISODE_SEARCH_METHOD_UNSPECIFIED = 0;
+  EPISODE_SEARCH_METHOD_BM25 = 1;
+}
+
+// Community search methods
+enum CommunitySearchMethod {
+  COMMUNITY_SEARCH_METHOD_UNSPECIFIED = 0;
+  COMMUNITY_SEARCH_METHOD_COSINE_SIMILARITY = 1;
+  COMMUNITY_SEARCH_METHOD_BM25 = 2;
+}
+
+// Edge reranker methods
+enum EdgeReranker {
+  EDGE_RERANKER_UNSPECIFIED = 0;
+  EDGE_RERANKER_RRF = 1;
+  EDGE_RERANKER_NODE_DISTANCE = 2;
+  EDGE_RERANKER_EPISODE_MENTIONS = 3;
+  EDGE_RERANKER_MMR = 4;
+  EDGE_RERANKER_CROSS_ENCODER = 5;
+}
+
+// Node reranker methods
+enum NodeReranker {
+  NODE_RERANKER_UNSPECIFIED = 0;
+  NODE_RERANKER_RRF = 1;
+  NODE_RERANKER_NODE_DISTANCE = 2;
+  NODE_RERANKER_EPISODE_MENTIONS = 3;
+  NODE_RERANKER_MMR = 4;
+  NODE_RERANKER_CROSS_ENCODER = 5;
+}
+
+// Episode reranker methods
+enum EpisodeReranker {
+  EPISODE_RERANKER_UNSPECIFIED = 0;
+  EPISODE_RERANKER_RRF = 1;
+  EPISODE_RERANKER_CROSS_ENCODER = 2;
+}
+
+// Community reranker methods
+enum CommunityReranker {
+  COMMUNITY_RERANKER_UNSPECIFIED = 0;
+  COMMUNITY_RERANKER_RRF = 1;
+  COMMUNITY_RERANKER_MMR = 2;
+  COMMUNITY_RERANKER_CROSS_ENCODER = 3;
+}
+
+// Edge search configuration
+message EdgeSearchConfig {
+  repeated EdgeSearchMethod search_methods = 1;
+  EdgeReranker reranker = 2;
+  optional double sim_min_score = 3;
+  optional double mmr_lambda = 4;
+  optional int32 bfs_max_depth = 5;
+}
+
+// Node search configuration
+message NodeSearchConfig {
+  repeated NodeSearchMethod search_methods = 1;
+  NodeReranker reranker = 2;
+  optional double sim_min_score = 3;
+  optional double mmr_lambda = 4;
+  optional int32 bfs_max_depth = 5;
+}
+
+// Episode search configuration
+message EpisodeSearchConfig {
+  repeated EpisodeSearchMethod search_methods = 1;
+  EpisodeReranker reranker = 2;
+  optional double sim_min_score = 3;
+  optional double mmr_lambda = 4;
+  optional int32 bfs_max_depth = 5;
+}
+
+// Community search configuration
+message CommunitySearchConfig {
+  repeated CommunitySearchMethod search_methods = 1;
+  CommunityReranker reranker = 2;
+  optional double sim_min_score = 3;
+  optional double mmr_lambda = 4;
+  optional int32 bfs_max_depth = 5;
+}
+
+// Full search configuration
+message SearchConfig {
+  optional EdgeSearchConfig edge_config = 1;
+  optional NodeSearchConfig node_config = 2;
+  optional EpisodeSearchConfig episode_config = 3;
+  optional CommunitySearchConfig community_config = 4;
+  optional int32 limit = 5;
+  optional double reranker_min_score = 6;
+}
+
+// Search filters for temporal and attribute filtering
+message SearchFilters {
+  repeated string node_labels = 1;
+  repeated string edge_types = 2;
+  repeated DateFilterGroup valid_at = 3;
+  repeated DateFilterGroup invalid_at = 4;
+  repeated DateFilterGroup created_at = 5;
+  repeated DateFilterGroup expired_at = 6;
+  repeated string edge_uuids = 7;
+  repeated PropertyFilter property_filters = 8;
+}
+
+// Group of date filters (AND within group, OR between groups)
+message DateFilterGroup {
+  repeated DateFilter filters = 1;
+}
+
+// Full search results containing all result types
+message SearchResults {
+  repeated EntityEdge edges = 1;
+  repeated double edge_reranker_scores = 2;
+  repeated EntityNode nodes = 3;
+  repeated double node_reranker_scores = 4;
+  repeated EpisodicNode episodes = 5;
+  repeated double episode_reranker_scores = 6;
+  repeated CommunityNode communities = 7;
+  repeated double community_reranker_scores = 8;
+}

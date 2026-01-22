@@ -1,0 +1,212 @@
+// Copyright 2024, Zep Software, Inc.
+// Licensed under the Apache License, Version 2.0
+
+syntax = "proto3";
+
+package graphiti.v1;
+
+import "google/protobuf/timestamp.proto";
+import "graphiti/v1/common.proto";
+import "graphiti/v1/nodes.proto";
+import "graphiti/v1/edges.proto";
+import "graphiti/v1/search.proto";
+
+option go_package = "github.com/getzep/graphiti/grpc/v1;graphitiv1";
+
+// RetrieveService handles data retrieval from the knowledge graph
+service RetrieveService {
+  // Simple search returning facts
+  rpc Search(SearchRequest) returns (SearchResponse);
+
+  // Advanced search with full configuration
+  rpc AdvancedSearch(AdvancedSearchRequest) returns (SearchResults);
+
+  // Streaming search for large result sets
+  rpc StreamSearch(SearchRequest) returns (stream SearchResultChunk);
+
+  // Get a specific entity edge by UUID
+  rpc GetEntityEdge(GetEntityEdgeRequest) returns (EntityEdge);
+
+  // Get entity edges by multiple UUIDs
+  rpc GetEntityEdges(GetEntityEdgesRequest) returns (GetEntityEdgesResponse);
+
+  // Get episodes for a group
+  rpc GetEpisodes(GetEpisodesRequest) returns (GetEpisodesResponse);
+
+  // Retrieve episodes with filters (streaming)
+  rpc RetrieveEpisodes(RetrieveEpisodesRequest) returns (stream EpisodicNode);
+
+  // Get memory (contextual retrieval based on messages)
+  rpc GetMemory(GetMemoryRequest) returns (GetMemoryResponse);
+
+  // Get entity node by UUID
+  rpc GetEntityNode(GetEntityNodeRequest) returns (EntityNode);
+
+  // Get entity nodes by group
+  rpc GetEntityNodes(GetEntityNodesRequest) returns (GetEntityNodesResponse);
+
+  // Get communities by group
+  rpc GetCommunities(GetCommunitiesRequest) returns (GetCommunitiesResponse);
+
+  // Get nodes and edges by episode UUIDs
+  rpc GetNodesByEpisodes(GetNodesByEpisodesRequest) returns (GetNodesByEpisodesResponse);
+
+  // Search nodes by query and entity types
+  rpc SearchNodes(SearchNodesRequest) returns (SearchNodesResponse);
+
+  // Search facts with optional center node
+  rpc SearchFacts(SearchFactsRequest) returns (SearchFactsResponse);
+}
+
+// Simple search request
+message SearchRequest {
+  repeated string group_ids = 1;
+  string query = 2;
+  optional int32 max_facts = 3;
+}
+
+// Simple search response with facts
+message SearchResponse {
+  repeated FactResult facts = 1;
+}
+
+// Advanced search request with full configuration
+message AdvancedSearchRequest {
+  repeated string group_ids = 1;
+  string query = 2;
+  optional SearchConfig config = 3;
+  optional SearchFilters filters = 4;
+  repeated string center_node_uuids = 5;
+}
+
+// Chunk of search results for streaming
+message SearchResultChunk {
+  oneof result {
+    EntityEdge edge = 1;
+    EntityNode node = 2;
+    EpisodicNode episode = 3;
+    CommunityNode community = 4;
+    FactResult fact = 5;
+  }
+  optional double score = 6;
+  bool is_last = 7;
+}
+
+// Request to get a specific entity edge
+message GetEntityEdgeRequest {
+  string uuid = 1;
+}
+
+// Request to get multiple entity edges
+message GetEntityEdgesRequest {
+  repeated string uuids = 1;
+}
+
+// Response with multiple entity edges
+message GetEntityEdgesResponse {
+  repeated EntityEdge edges = 1;
+}
+
+// Request to get episodes
+message GetEpisodesRequest {
+  string group_id = 1;
+  optional int32 last_n = 2;
+  optional google.protobuf.Timestamp reference_time = 3;
+  optional PaginationCursor pagination = 4;
+}
+
+// Response with episodes
+message GetEpisodesResponse {
+  repeated EpisodicNode episodes = 1;
+  optional string next_cursor = 2;
+}
+
+// Request to get memory based on messages
+message GetMemoryRequest {
+  string group_id = 1;
+  optional int32 max_facts = 2;
+  optional string center_node_uuid = 3;
+  repeated Message messages = 4;
+}
+
+// Response with memory facts
+message GetMemoryResponse {
+  repeated FactResult facts = 1;
+}
+
+// Request to get an entity node
+message GetEntityNodeRequest {
+  string uuid = 1;
+}
+
+// Request to get entity nodes by group
+message GetEntityNodesRequest {
+  repeated string group_ids = 1;
+  optional PaginationCursor pagination = 2;
+}
+
+// Response with entity nodes
+message GetEntityNodesResponse {
+  repeated EntityNode nodes = 1;
+  optional string next_cursor = 2;
+}
+
+// Request to get communities
+message GetCommunitiesRequest {
+  repeated string group_ids = 1;
+  optional PaginationCursor pagination = 2;
+}
+
+// Response with communities
+message GetCommunitiesResponse {
+  repeated CommunityNode communities = 1;
+  optional string next_cursor = 2;
+}
+
+// Request to retrieve episodes with filters (streaming)
+message RetrieveEpisodesRequest {
+  repeated string group_ids = 1;
+  google.protobuf.Timestamp reference_time = 2;
+  int32 last_n = 3;
+  optional EpisodeType source = 4;
+  optional string saga = 5;
+}
+
+// Request to get nodes and edges by episode UUIDs
+message GetNodesByEpisodesRequest {
+  repeated string episode_uuids = 1;
+}
+
+// Response with nodes and edges from episodes
+message GetNodesByEpisodesResponse {
+  repeated EntityNode nodes = 1;
+  repeated EntityEdge edges = 2;
+}
+
+// Request to search nodes
+message SearchNodesRequest {
+  string query = 1;
+  repeated string group_ids = 2;
+  optional int32 max_nodes = 3;
+  repeated string entity_types = 4;
+}
+
+// Response with searched nodes
+message SearchNodesResponse {
+  repeated EntityNode nodes = 1;
+  string message = 2;
+}
+
+// Request to search facts
+message SearchFactsRequest {
+  string query = 1;
+  repeated string group_ids = 2;
+  optional int32 max_facts = 3;
+  optional string center_node_uuid = 4;
+}
+
+// Response with searched facts
+message SearchFactsResponse {
+  repeated FactResult facts = 1;
+  string message = 2;
+}

@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Graphiti gRPC Server
+  graphiti-grpc:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "50051:50051"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-password}
+      - DATABASE_PROVIDER=neo4j
+      - CONFIG_PATH=/app/config/config-docker-neo4j.yaml
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    volumes:
+      - ../config:/app/config:ro
+    restart: unless-stopped
+    networks:
+      - graphiti-network
+
+  # Neo4j Database
+  neo4j:
+    image: neo4j:5.26-community
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-password}
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - graphiti-network
+
+networks:
+  graphiti-network:
+    driver: bridge
+
+volumes:
+  neo4j-data:
+  neo4j-logs:

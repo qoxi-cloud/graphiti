@@ -1,0 +1,58 @@
+// Copyright 2024, Zep Software, Inc.
+// Licensed under the Apache License, Version 2.0
+
+syntax = "proto3";
+
+package graphiti.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "graphiti/v1/common.proto";
+
+option go_package = "github.com/getzep/graphiti/grpc/v1;graphitiv1";
+
+// Episodic node representing an episode in the graph
+message EpisodicNode {
+  string uuid = 1;
+  string name = 2;
+  string group_id = 3;
+  repeated string labels = 4;
+  google.protobuf.Timestamp created_at = 5;
+  EpisodeType source = 6;
+  string source_description = 7;
+  string content = 8;
+  google.protobuf.Timestamp valid_at = 9;
+  repeated string entity_edges = 10;
+}
+
+// Entity node representing an entity in the graph
+message EntityNode {
+  string uuid = 1;
+  string name = 2;
+  string group_id = 3;
+  repeated string labels = 4;
+  google.protobuf.Timestamp created_at = 5;
+  string summary = 6;
+  google.protobuf.Struct attributes = 7;
+  // Note: name_embedding is not exposed via gRPC (generated server-side)
+}
+
+// Community node representing a community cluster
+message CommunityNode {
+  string uuid = 1;
+  string name = 2;
+  string group_id = 3;
+  repeated string labels = 4;
+  google.protobuf.Timestamp created_at = 5;
+  string summary = 6;
+  // Note: name_embedding is not exposed via gRPC (generated server-side)
+}
+
+// Saga node for episode sequence tracking
+message SagaNode {
+  string uuid = 1;
+  string name = 2;
+  string group_id = 3;
+  repeated string labels = 4;
+  google.protobuf.Timestamp created_at = 5;
+}

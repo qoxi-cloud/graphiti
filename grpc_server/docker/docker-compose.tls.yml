@@ -1,0 +1,30 @@
+# Docker Compose override for TLS mode
+#
+# Usage:
+#   docker-compose -f docker-compose-falkordb.yml -f docker-compose.tls.yml up
+#
+# Prerequisites:
+#   1. Generate certificates: ./certs/generate-certs.sh
+#   2. Ensure config/config-tls.yaml exists
+#
+# For mTLS (mutual TLS), also mount client certificates and configure
+# your gRPC client to use them.
+
+services:
+  graphiti-grpc:
+    environment:
+      - GRPC_ENABLE_TLS=true
+      - GRPC_CERT_PATH=/app/certs/server.crt
+      - GRPC_KEY_PATH=/app/certs/server.key
+      - CONFIG_PATH=/app/config/config-tls.yaml
+    volumes:
+      - ./certs:/app/certs:ro
+      - ../config/config-tls.yaml:/app/config/config-tls.yaml:ro
+    # Override healthcheck to use secure channel
+    # Note: grpcurl or custom TLS health check would be needed
+    healthcheck:
+      test: ["CMD", "python", "-c", "print('TLS enabled - manual health check recommended')"]
+      interval: 30s
+      timeout: 10s
+      start-period: 10s
+      retries: 3

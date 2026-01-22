@@ -1,0 +1,78 @@
+# Example configuration for gRPC server with authentication enabled
+#
+# This file demonstrates how to configure API key and JWT authentication
+# for the Graphiti gRPC server.
+#
+# Copy this file to config/config.yaml and customize for your environment.
+
+# gRPC server configuration
+grpc:
+  host: "0.0.0.0"
+  port: 50051
+  max_workers: 10
+  enable_tls: false
+  enable_reflection: true
+
+  # Compression
+  compression:
+    enabled: true
+    algorithm: "gzip"
+    level: 2
+
+  # Timeouts (seconds, 0 = no timeout)
+  timeouts:
+    enabled: true
+    default: 30
+    services:
+      IngestService:
+        default: 120
+        methods:
+          AddEpisodeBulk: 600
+          StreamEpisodes: 0
+      RetrieveService:
+        default: 30
+      AdminService:
+        default: 60
+
+  # Authentication configuration
+  auth:
+    enabled: true
+    # Generate: python -c "import secrets; print(secrets.token_urlsafe(32))"
+    api_keys:
+      - "your-api-key-here-change-this-to-a-random-value"
+      - "another-api-key-for-different-client"
+    jwt_secret: "your-jwt-secret-here-change-this-to-a-random-value"
+    jwt_algorithm: "HS256"
+    skip_health_check: true
+
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    window_seconds: 60
+    max_requests: 100
+
+# LLM configuration
+llm:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  temperature: 0.0
+
+# Embedder configuration
+embedder:
+  provider: "openai"
+  model: "text-embedding-3-small"
+
+# Database configuration
+database:
+  provider: "falkordb"
+  providers:
+    falkordb:
+      host: "localhost"
+      port: 6379
+      password: null
+      database: "default_db"
+
+# Graphiti application configuration
+graphiti:
+  group_id: "default-group"
+  user_id: "default-user"

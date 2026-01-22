@@ -1,0 +1,111 @@
+# Graphiti gRPC Server Configuration
+# Environment variables can be used with ${VAR_NAME} or ${VAR_NAME:default_value} syntax
+
+# gRPC Server Configuration
+grpc:
+  host: "0.0.0.0"
+  port: 50051
+  max_workers: 10
+  enable_tls: ${GRPC_ENABLE_TLS:false}
+  cert_path: ${GRPC_CERT_PATH:}
+  key_path: ${GRPC_KEY_PATH:}
+  enable_reflection: true
+
+  # Compression Configuration
+  compression:
+    enabled: true
+    algorithm: "gzip"  # gzip, deflate, none
+    level: 2           # 0-9 (0=none, 9=max)
+
+  # Timeout Configuration (seconds, 0 = no timeout)
+  timeouts:
+    enabled: true
+    default: 30
+    services:
+      IngestService:
+        default: 120
+        methods:
+          AddEpisodeBulk: 600
+          StreamEpisodes: 0
+      RetrieveService:
+        default: 30
+        methods:
+          StreamSearch: 0
+          RetrieveEpisodes: 0
+      AdminService:
+        default: 60
+        methods:
+          BuildCommunities: 300
+          ClearData: 120
+
+  # Authentication (disabled by default)
+  auth:
+    enabled: false
+    api_keys: []
+    jwt_secret: ${GRPC_JWT_SECRET:}
+    jwt_algorithm: "HS256"
+    skip_health_check: true
+
+  # Rate Limiting (disabled by default)
+  rate_limit:
+    enabled: false
+    window_seconds: 60
+    max_requests: 1000
+    read_max_requests: 500
+    write_max_requests: 100
+    skip_methods:
+      - "HealthCheck"
+      - "GetStatus"
+
+# LLM Configuration
+llm:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  temperature: null
+  max_tokens: 4096
+  providers:
+    openai:
+      api_key: ${OPENAI_API_KEY:}
+      api_url: "https://api.openai.com/v1"
+    anthropic:
+      api_key: ${ANTHROPIC_API_KEY:}
+    gemini:
+      api_key: ${GOOGLE_API_KEY:}
+    groq:
+      api_key: ${GROQ_API_KEY:}
+
+# Embedder Configuration
+embedder:
+  provider: "openai"
+  model: "text-embedding-3-small"
+  dimensions: 1536
+  providers:
+    openai:
+      api_key: ${OPENAI_API_KEY:}
+    voyage:
+      api_key: ${VOYAGE_API_KEY:}
+
+# Database Configuration
+database:
+  provider: "falkordb"
+  providers:
+    neo4j:
+      uri: ${NEO4J_URI:bolt://localhost:7687}
+      username: ${NEO4J_USER:neo4j}
+      password: ${NEO4J_PASSWORD:}
+      database: "neo4j"
+      use_parallel_runtime: false
+    falkordb:
+      uri: ${FALKORDB_URI:redis://localhost:6379}
+      password: ${FALKORDB_PASSWORD:}
+      database: "default_db"
+
+# Graphiti Application Configuration
+graphiti:
+  group_id: "main"
+  episode_id_prefix: ""
+  user_id: "grpc_user"
+  entity_types: []
+
+# Server Options
+destroy_graph: false

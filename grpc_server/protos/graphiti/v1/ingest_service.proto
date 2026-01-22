@@ -1,0 +1,131 @@
+// Copyright 2024, Zep Software, Inc.
+// Licensed under the Apache License, Version 2.0
+
+syntax = "proto3";
+
+package graphiti.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "graphiti/v1/common.proto";
+import "graphiti/v1/nodes.proto";
+import "graphiti/v1/edges.proto";
+
+option go_package = "github.com/getzep/graphiti/grpc/v1;graphitiv1";
+
+// IngestService handles data ingestion into the knowledge graph
+service IngestService {
+  // Add a single episode to the graph
+  rpc AddEpisode(AddEpisodeRequest) returns (AddEpisodeResponse);
+
+  // Add multiple episodes in bulk with progress streaming
+  rpc AddEpisodeBulk(AddEpisodeBulkRequest) returns (stream AddEpisodeBulkProgress);
+
+  // Add messages (chat/conversation format)
+  rpc AddMessages(AddMessagesRequest) returns (AddMessagesResponse);
+
+  // Add an entity node directly
+  rpc AddEntityNode(AddEntityNodeRequest) returns (EntityNode);
+
+  // Add a triplet (subject-predicate-object) directly
+  rpc AddTriplet(AddTripletRequest) returns (AddTripletResponse);
+
+  // Bidirectional streaming for continuous episode ingestion
+  rpc StreamEpisodes(stream StreamEpisodeRequest) returns (stream StreamEpisodeResponse);
+}
+
+// Request to add a single episode
+message AddEpisodeRequest {
+  optional string uuid = 1;
+  string group_id = 2;
+  string name = 3;
+  string episode_body = 4;
+  google.protobuf.Timestamp reference_time = 5;
+  EpisodeType source = 6;
+  string source_description = 7;
+  optional string saga = 8;
+  optional google.protobuf.Struct entity_types = 9;
+  bool update_communities = 10;
+  optional string saga_previous_episode_uuid = 11;
+  repeated string previous_episode_uuids = 12;
+  optional string custom_extraction_instructions = 13;
+}
+
+// Response after adding an episode
+message AddEpisodeResponse {
+  EpisodicNode episode = 1;
+  repeated EntityNode nodes = 2;
+  repeated EntityEdge edges = 3;
+}
+
+// Request to add multiple episodes in bulk
+message AddEpisodeBulkRequest {
+  repeated AddEpisodeRequest episodes = 1;
+}
+
+// Progress update for bulk episode addition
+message AddEpisodeBulkProgress {
+  int32 total = 1;
+  int32 completed = 2;
+  int32 failed = 3;
+  optional string current_uuid = 4;
+  optional string error_message = 5;
+  bool is_complete = 6;
+  repeated AddEpisodeResponse results = 7;
+}
+
+// Request to add messages
+message AddMessagesRequest {
+  string group_id = 1;
+  repeated Message messages = 2;
+}
+
+// Response after adding messages
+message AddMessagesResponse {
+  OperationResult result = 1;
+  int32 queued_count = 2;
+}
+
+// Request to add an entity node
+message AddEntityNodeRequest {
+  optional string uuid = 1;
+  string group_id = 2;
+  string name = 3;
+  optional string summary = 4;
+  repeated string labels = 5;
+  optional google.protobuf.Struct attributes = 6;
+}
+
+// Request to add a triplet
+message AddTripletRequest {
+  string group_id = 1;
+  string subject_name = 2;
+  string predicate = 3;
+  string object_name = 4;
+  optional string subject_uuid = 5;
+  optional string object_uuid = 6;
+  optional google.protobuf.Timestamp valid_at = 7;
+  optional google.protobuf.Timestamp invalid_at = 8;
+}
+
+// Response after adding a triplet
+message AddTripletResponse {
+  EntityNode subject_node = 1;
+  EntityNode object_node = 2;
+  EntityEdge edge = 3;
+}
+
+// Request for streaming episode ingestion
+message StreamEpisodeRequest {
+  AddEpisodeRequest episode = 1;
+  optional string correlation_id = 2;
+}
+
+// Response for streaming episode ingestion
+message StreamEpisodeResponse {
+  optional string correlation_id = 1;
+  oneof result {
+    AddEpisodeResponse success = 2;
+    string error = 3;
+  }
+}

@@ -1,0 +1,75 @@
+// Copyright 2024, Zep Software, Inc.
+// Licensed under the Apache License, Version 2.0
+
+syntax = "proto3";
+
+package graphiti.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/getzep/graphiti/grpc/v1;graphitiv1";
+
+// Common message for operation results
+message OperationResult {
+  bool success = 1;
+  string message = 2;
+  optional string error_code = 3;
+  optional string error_details = 4;
+}
+
+// Message representing a chat/conversation message
+message Message {
+  string uuid = 1;
+  string name = 2;
+  string role = 3;
+  string role_type = 4;
+  string content = 5;
+  google.protobuf.Timestamp timestamp = 6;
+  string source_description = 7;
+}
+
+// Episode type enum
+enum EpisodeType {
+  EPISODE_TYPE_UNSPECIFIED = 0;
+  EPISODE_TYPE_MESSAGE = 1;
+  EPISODE_TYPE_JSON = 2;
+  EPISODE_TYPE_TEXT = 3;
+}
+
+// Comparison operator for filters
+enum ComparisonOperator {
+  COMPARISON_OPERATOR_UNSPECIFIED = 0;
+  COMPARISON_OPERATOR_EQUALS = 1;
+  COMPARISON_OPERATOR_NOT_EQUALS = 2;
+  COMPARISON_OPERATOR_GREATER_THAN = 3;
+  COMPARISON_OPERATOR_LESS_THAN = 4;
+  COMPARISON_OPERATOR_GREATER_THAN_EQUAL = 5;
+  COMPARISON_OPERATOR_LESS_THAN_EQUAL = 6;
+  COMPARISON_OPERATOR_IS_NULL = 7;
+  COMPARISON_OPERATOR_IS_NOT_NULL = 8;
+}
+
+// Date filter for temporal queries
+message DateFilter {
+  optional google.protobuf.Timestamp date = 1;
+  ComparisonOperator comparison_operator = 2;
+}
+
+// Property filter for attribute-based queries
+message PropertyFilter {
+  string property_name = 1;
+  oneof property_value {
+    string string_value = 2;
+    int64 int_value = 3;
+    double float_value = 4;
+    bool bool_value = 5;
+  }
+  ComparisonOperator comparison_operator = 6;
+}
+
+// Pagination cursor
+message PaginationCursor {
+  optional string uuid_cursor = 1;
+  optional int32 limit = 2;
+}

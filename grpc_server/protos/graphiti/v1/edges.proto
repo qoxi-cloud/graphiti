@@ -1,0 +1,75 @@
+// Copyright 2024, Zep Software, Inc.
+// Licensed under the Apache License, Version 2.0
+
+syntax = "proto3";
+
+package graphiti.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/getzep/graphiti/grpc/v1;graphitiv1";
+
+// Episodic edge connecting episodes to entities
+message EpisodicEdge {
+  string uuid = 1;
+  string group_id = 2;
+  string source_node_uuid = 3;
+  string target_node_uuid = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+// Entity edge representing relationships between entities
+message EntityEdge {
+  string uuid = 1;
+  string group_id = 2;
+  string source_node_uuid = 3;
+  string target_node_uuid = 4;
+  google.protobuf.Timestamp created_at = 5;
+  string name = 6;
+  string fact = 7;
+  repeated string episodes = 8;
+  optional google.protobuf.Timestamp expired_at = 9;
+  optional google.protobuf.Timestamp valid_at = 10;
+  optional google.protobuf.Timestamp invalid_at = 11;
+  google.protobuf.Struct attributes = 12;
+  // Note: fact_embedding is not exposed via gRPC (generated server-side)
+}
+
+// Community edge connecting communities to entities
+message CommunityEdge {
+  string uuid = 1;
+  string group_id = 2;
+  string source_node_uuid = 3;
+  string target_node_uuid = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+// HasEpisode edge connecting sagas to episodes
+message HasEpisodeEdge {
+  string uuid = 1;
+  string group_id = 2;
+  string source_node_uuid = 3;
+  string target_node_uuid = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+// NextEpisode edge connecting sequential episodes
+message NextEpisodeEdge {
+  string uuid = 1;
+  string group_id = 2;
+  string source_node_uuid = 3;
+  string target_node_uuid = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+// Fact result for search responses (simplified edge view)
+message FactResult {
+  string uuid = 1;
+  string name = 2;
+  string fact = 3;
+  optional google.protobuf.Timestamp valid_at = 4;
+  optional google.protobuf.Timestamp invalid_at = 5;
+  google.protobuf.Timestamp created_at = 6;
+  optional google.protobuf.Timestamp expired_at = 7;
+}

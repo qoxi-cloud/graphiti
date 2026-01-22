@@ -648,7 +648,7 @@ wheels = [
 
 [[package]]
 name = "graphiti-core"
-version = "0.23.1"
+version = "0.26.0"
 source = { editable = "../" }
 dependencies = [
     { name = "diskcache" },
@@ -716,6 +716,32 @@ requires-dist = [
     { name = "voyageai", marker = "extra == 'voyageai'", specifier = ">=0.2.3" },
 ]
 provides-extras = ["anthropic", "groq", "google-genai", "kuzu", "falkordb", "voyageai", "neo4j-opensearch", "sentence-transformers", "neptune", "tracing", "dev"]
+
+[[package]]
+name = "graphiti-server-common"
+version = "0.1.0"
+source = { editable = "../server_common" }
+dependencies = [
+    { name = "graphiti-core" },
+    { name = "openai" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "pyyaml" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "azure-identity", marker = "extra == 'azure'", specifier = ">=1.15.0" },
+    { name = "graphiti-core", specifier = ">=0.23.0" },
+    { name = "openai", specifier = ">=1.0.0" },
+    { name = "pydantic", specifier = ">=2.0.0" },
+    { name = "pydantic-settings", specifier = ">=2.0.0" },
+    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.350" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
+]
+provides-extras = ["azure", "dev"]
 
 [[package]]
 name = "groq"
@@ -1078,6 +1104,7 @@ version = "1.0.1"
 source = { virtual = "." }
 dependencies = [
     { name = "graphiti-core", extra = ["falkordb"] },
+    { name = "graphiti-server-common" },
     { name = "mcp" },
     { name = "openai" },
     { name = "pydantic-settings" },
@@ -1116,6 +1143,7 @@ requires-dist = [
     { name = "azure-identity", marker = "extra == 'azure'", specifier = ">=1.21.0" },
     { name = "google-genai", marker = "extra == 'providers'", specifier = ">=1.8.0" },
     { name = "graphiti-core", extras = ["falkordb"], editable = "../" },
+    { name = "graphiti-server-common", editable = "../server_common" },
     { name = "groq", marker = "extra == 'providers'", specifier = ">=0.2.0" },
     { name = "mcp", specifier = ">=1.9.4" },
     { name = "openai", specifier = ">=1.91.0" },

@@ -8,6 +8,7 @@ dependencies = [
     "mcp>=1.9.4",
     "openai>=1.91.0",
     "graphiti-core[falkordb]>=0.23.1",
+    "graphiti-server-common",
     "pydantic-settings>=2.0.0",
     "pyyaml>=6.0",
     "typing-extensions>=4.0.0",
@@ -61,6 +62,7 @@ docstring-code-format = true
 
 [tool.uv.sources]
 graphiti-core = { path = "../", editable = true }
+graphiti-server-common = { path = "../server_common", editable = true }
 
 [dependency-groups]
 dev = [

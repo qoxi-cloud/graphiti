@@ -1,0 +1,138 @@
+// Copyright 2024, Zep Software, Inc.
+// Licensed under the Apache License, Version 2.0
+
+syntax = "proto3";
+
+package graphiti.v1;
+
+import "graphiti/v1/common.proto";
+import "graphiti/v1/nodes.proto";
+
+option go_package = "github.com/getzep/graphiti/grpc/v1;graphitiv1";
+
+// AdminService handles administrative operations
+service AdminService {
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+
+  // Get server status
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
+
+  // Delete an entity edge
+  rpc DeleteEntityEdge(DeleteEntityEdgeRequest) returns (OperationResult);
+
+  // Delete multiple entity edges
+  rpc DeleteEntityEdges(DeleteEntityEdgesRequest) returns (OperationResult);
+
+  // Delete a group and all its data
+  rpc DeleteGroup(DeleteGroupRequest) returns (OperationResult);
+
+  // Delete an episode
+  rpc DeleteEpisode(DeleteEpisodeRequest) returns (OperationResult);
+
+  // Delete multiple episodes
+  rpc DeleteEpisodes(DeleteEpisodesRequest) returns (OperationResult);
+
+  // Delete an entity node
+  rpc DeleteEntityNode(DeleteEntityNodeRequest) returns (OperationResult);
+
+  // Clear all data in the graph
+  rpc ClearData(ClearDataRequest) returns (OperationResult);
+
+  // Build indices and constraints
+  rpc BuildIndices(BuildIndicesRequest) returns (OperationResult);
+
+  // Remove an episode and clean up orphaned nodes
+  rpc RemoveEpisode(RemoveEpisodeRequest) returns (RemoveEpisodeResponse);
+
+  // Build communities for specified groups
+  rpc BuildCommunities(BuildCommunitiesRequest) returns (BuildCommunitiesResponse);
+}
+
+// Health check request
+message HealthCheckRequest {}
+
+// Health check response
+message HealthCheckResponse {
+  enum ServingStatus {
+    SERVING_STATUS_UNSPECIFIED = 0;
+    SERVING_STATUS_SERVING = 1;
+    SERVING_STATUS_NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+  string message = 2;
+}
+
+// Get status request
+message GetStatusRequest {}
+
+// Get status response
+message GetStatusResponse {
+  string version = 1;
+  string database_provider = 2;
+  string llm_provider = 3;
+  string embedder_provider = 4;
+  bool database_connected = 5;
+  int64 uptime_seconds = 6;
+}
+
+// Delete entity edge request
+message DeleteEntityEdgeRequest {
+  string uuid = 1;
+}
+
+// Delete multiple entity edges request
+message DeleteEntityEdgesRequest {
+  repeated string uuids = 1;
+}
+
+// Delete group request
+message DeleteGroupRequest {
+  string group_id = 1;
+}
+
+// Delete episode request
+message DeleteEpisodeRequest {
+  string uuid = 1;
+}
+
+// Delete multiple episodes request
+message DeleteEpisodesRequest {
+  repeated string uuids = 1;
+}
+
+// Delete entity node request
+message DeleteEntityNodeRequest {
+  string uuid = 1;
+}
+
+// Clear data request
+message ClearDataRequest {
+  bool confirm = 1;
+}
+
+// Build indices request
+message BuildIndicesRequest {}
+
+// Remove episode request
+message RemoveEpisodeRequest {
+  string uuid = 1;
+}
+
+// Remove episode response
+message RemoveEpisodeResponse {
+  OperationResult result = 1;
+  int32 orphaned_nodes_removed = 2;
+  int32 orphaned_edges_removed = 3;
+}
+
+// Build communities request
+message BuildCommunitiesRequest {
+  repeated string group_ids = 1;
+}
+
+// Build communities response
+message BuildCommunitiesResponse {
+  repeated CommunityNode communities = 1;
+  int32 total_created = 2;
+}
