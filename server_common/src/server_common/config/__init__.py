@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
-    SettingsConfigDict,
 )
 
 
@@ -52,7 +51,7 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
             return [self._expand_env_vars(item) for item in value]
         return value
 
-    def get_field_value(self, field_name: str, field_info: Any) -> Any:
+    def get_field_value(self, field: Any, field_name: str) -> Any:
         """Get field value from YAML config."""
         return None
 

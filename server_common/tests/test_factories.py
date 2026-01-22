@@ -1,6 +1,5 @@
 """Tests for server_common.factories module."""
 
-import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -86,7 +85,7 @@ class TestLLMClientFactory:
             mock_instance = MagicMock()
             mock_client.return_value = mock_instance
 
-            client = LLMClientFactory.create(config)
+            LLMClientFactory.create(config)
 
             mock_client.assert_called_once()
             call_kwargs = mock_client.call_args[1]
@@ -107,7 +106,7 @@ class TestLLMClientFactory:
             mock_instance = MagicMock()
             mock_client.return_value = mock_instance
 
-            client = LLMClientFactory.create(config)
+            LLMClientFactory.create(config)
 
             call_kwargs = mock_client.call_args[1]
             assert call_kwargs.get('reasoning') == 'minimal'

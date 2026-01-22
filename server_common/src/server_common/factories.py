@@ -25,9 +25,9 @@ try:
 except ImportError:
     HAS_FALKOR = False
 
-from graphiti_core.embedder import EmbedderClient, OpenAIEmbedder
-from graphiti_core.llm_client import LLMClient, OpenAIClient
-from graphiti_core.llm_client.config import LLMConfig as GraphitiLLMConfig
+from graphiti_core.embedder import EmbedderClient, OpenAIEmbedder  # noqa: E402
+from graphiti_core.llm_client import LLMClient, OpenAIClient  # noqa: E402
+from graphiti_core.llm_client.config import LLMConfig as GraphitiLLMConfig  # noqa: E402
 
 # Try to import additional providers if available
 try:
@@ -114,7 +114,8 @@ def _validate_api_key(provider_name: str, api_key: str | None) -> str:
     """
     if not api_key:
         raise ValueError(
-            f'{provider_name} API key is not configured. Please set the appropriate environment variable.'
+            f'{provider_name} API key is not configured. '
+            'Please set the appropriate environment variable.'
         )
 
     logger.info(f'Creating {provider_name} client')
@@ -151,14 +152,14 @@ class LLMClientFactory:
                     api_key=api_key,
                     model=config.model,
                     small_model=small_model,
-                    temperature=config.temperature,
+                    temperature=config.temperature,  # type: ignore[arg-type]
                     max_tokens=config.max_tokens,
                 )
 
                 if is_reasoning_model:
                     return OpenAIClient(config=llm_config, reasoning='minimal', verbosity='low')
                 else:
-                    return OpenAIClient(config=llm_config, reasoning=None, verbosity=None)
+                    return OpenAIClient(config=llm_config)  # type: ignore[call-arg]
 
             case 'azure_openai':
                 if not HAS_AZURE_LLM:
@@ -195,11 +196,11 @@ class LLMClientFactory:
                     api_key=api_key,
                     base_url=azure_config.api_url,
                     model=config.model,
-                    temperature=config.temperature,
+                    temperature=config.temperature,  # type: ignore[arg-type]
                     max_tokens=config.max_tokens,
                 )
 
-                return AzureOpenAILLMClient(
+                return AzureOpenAILLMClient(  # type: ignore[possibly-undefined]
                     azure_client=azure_client,
                     config=llm_config,
                     max_tokens=config.max_tokens,
@@ -219,10 +220,10 @@ class LLMClientFactory:
                 llm_config = GraphitiLLMConfig(
                     api_key=api_key,
                     model=config.model,
-                    temperature=config.temperature,
+                    temperature=config.temperature,  # type: ignore[arg-type]
                     max_tokens=config.max_tokens,
                 )
-                return AnthropicClient(config=llm_config)
+                return AnthropicClient(config=llm_config)  # type: ignore[possibly-undefined]
 
             case 'gemini':
                 if not HAS_GEMINI:
@@ -236,10 +237,10 @@ class LLMClientFactory:
                 llm_config = GraphitiLLMConfig(
                     api_key=api_key,
                     model=config.model,
-                    temperature=config.temperature,
+                    temperature=config.temperature,  # type: ignore[arg-type]
                     max_tokens=config.max_tokens,
                 )
-                return GeminiClient(config=llm_config)
+                return GeminiClient(config=llm_config)  # type: ignore[possibly-undefined]
 
             case 'groq':
                 if not HAS_GROQ:
@@ -254,10 +255,10 @@ class LLMClientFactory:
                     api_key=api_key,
                     base_url=config.providers.groq.api_url,
                     model=config.model,
-                    temperature=config.temperature,
+                    temperature=config.temperature,  # type: ignore[arg-type]
                     max_tokens=config.max_tokens,
                 )
-                return GroqClient(config=llm_config)
+                return GroqClient(config=llm_config)  # type: ignore[possibly-undefined]
 
             case _:
                 raise ValueError(f'Unsupported LLM provider: {provider}')
@@ -318,7 +319,7 @@ class EmbedderFactory:
                     azure_ad_token_provider=azure_ad_token_provider,
                 )
 
-                return AzureOpenAIEmbedderClient(
+                return AzureOpenAIEmbedderClient(  # type: ignore[possibly-undefined]
                     azure_client=azure_client,
                     model=config.model or 'text-embedding-3-small',
                 )
@@ -341,7 +342,7 @@ class EmbedderFactory:
                     embedding_model=config.model or 'models/text-embedding-004',
                     embedding_dim=config.dimensions or 768,
                 )
-                return GeminiEmbedder(config=gemini_config)
+                return GeminiEmbedder(config=gemini_config)  # type: ignore[possibly-undefined]
 
             case 'voyage':
                 if not HAS_VOYAGE_EMBEDDER:
@@ -361,7 +362,7 @@ class EmbedderFactory:
                     embedding_model=config.model or 'voyage-3',
                     embedding_dim=config.dimensions or 1024,
                 )
-                return VoyageAIEmbedder(config=voyage_config)
+                return VoyageAIEmbedder(config=voyage_config)  # type: ignore[possibly-undefined]
 
             case _:
                 raise ValueError(f'Unsupported Embedder provider: {provider}')

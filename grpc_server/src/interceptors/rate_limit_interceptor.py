@@ -248,7 +248,8 @@ class RateLimitInterceptor(grpc.aio.ServerInterceptor):
 
         # Try to get authenticated user from metadata
         try:
-            metadata = dict(context.invocation_metadata()) if context.invocation_metadata() else {}
+            invocation_metadata = context.invocation_metadata()
+            metadata = dict(invocation_metadata) if invocation_metadata else {}  # type: ignore[arg-type]
             # Check common authentication headers
             for key in ['x-user-id', 'x-client-id', 'authorization']:
                 if key in metadata:

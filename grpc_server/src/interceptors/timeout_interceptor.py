@@ -6,9 +6,37 @@ Returns DEADLINE_EXCEEDED status when timeouts are exceeded.
 
 import asyncio
 import logging
+import sys
 from typing import Any, Callable
 
 import grpc
+
+# Python 3.11+ has asyncio.timeout, earlier versions need a polyfill
+if sys.version_info >= (3, 11):
+    from asyncio import timeout as asyncio_timeout
+else:
+    from contextlib import asynccontextmanager
+
+    @asynccontextmanager
+    async def asyncio_timeout(delay: float | None):
+        """Simple timeout context manager for Python < 3.11."""
+        if delay is None:
+            yield
+            return
+
+        async def _timeout_task():
+            await asyncio.sleep(delay)
+            raise asyncio.TimeoutError()
+
+        task = asyncio.create_task(_timeout_task())
+        try:
+            yield
+        finally:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
 from src.config.schema import TimeoutConfig
 
@@ -355,7 +383,7 @@ class TimeoutInterceptor(grpc.aio.ServerInterceptor):
             Items from the stream until timeout or completion
         """
         try:
-            async with asyncio.timeout(timeout):
+            async with asyncio_timeout(timeout):
                 async for item in stream:
                     yield item
         except asyncio.TimeoutError:

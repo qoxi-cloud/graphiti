@@ -336,7 +336,7 @@ class RetrieveServiceServicer(BaseServicer, retrieve_service_pb2_grpc.RetrieveSe
                 group_ids=group_ids,
                 last_n=last_n,
                 reference_time=reference_time,
-                source_types=[source_type] if source_type else None,
+                source=source_type,
                 saga=saga,
             )
 
