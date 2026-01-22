@@ -30,6 +30,16 @@ jobs:
         shell: bash
         run: |
           uv run pyright ./graphiti_core
+      - name: Install server-common dependencies
+        shell: bash
+        run: |
+          cd server_common
+          uv sync --extra dev
+      - name: Run Pyright for server-common
+        shell: bash
+        run: |
+          cd server_common
+          uv run pyright src
       - name: Install graph-service dependencies
         shell: bash
         run: |
@@ -40,3 +50,13 @@ jobs:
         run: |
           cd server
           uv run pyright .
+      - name: Install grpc-server dependencies
+        shell: bash
+        run: |
+          cd grpc_server
+          uv sync --extra dev
+      - name: Run Pyright for grpc-server
+        shell: bash
+        run: |
+          cd grpc_server
+          uv run pyright src

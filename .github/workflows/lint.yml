@@ -22,3 +22,7 @@ jobs:
           pip install "ruff>0.1.7"
       - name: Run Ruff linting
         run: ruff check --output-format=github
+      - name: Run Ruff linting for server_common
+        run: ruff check server_common/src server_common/tests --output-format=github
+      - name: Run Ruff linting for grpc_server
+        run: ruff check grpc_server/src grpc_server/tests --output-format=github

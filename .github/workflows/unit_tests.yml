@@ -98,3 +98,45 @@ jobs:
             tests/cross_encoder/test_bge_reranker_client_int.py \
             tests/driver/test_falkordb_driver.py \
             -m "not integration"
+
+  server-common-tests:
+    runs-on: depot-ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+      - name: Install dependencies
+        run: |
+          cd server_common
+          uv sync --extra dev
+      - name: Run server-common unit tests
+        run: |
+          cd server_common
+          uv run pytest tests/ -v
+
+  grpc-server-tests:
+    runs-on: depot-ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+      - name: Install dependencies
+        run: |
+          cd grpc_server
+          uv sync --extra dev
+      - name: Run grpc-server unit tests
+        run: |
+          cd grpc_server
+          uv run pytest tests/ -v --cov=src --cov-report=term-missing
